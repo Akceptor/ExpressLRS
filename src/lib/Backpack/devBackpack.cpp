@@ -20,6 +20,7 @@ bool HTEnableFlagReadyToSend = false;
 bool BackpackTelemReadyToSend = false;
 
 bool lastRecordingState = false;
+uint8_t lastSwitchState = 8;
 
 #if defined(GPIO_PIN_BACKPACK_EN)
 
@@ -223,38 +224,54 @@ uint8_t GetDvrDelaySeconds(uint8_t index)
     return delays[index >= sizeof(delays) ? 0 : index];
 }
 
-static void AuxStateToMSPOut()
+static void AuxStateToMSPOut() //TODO Work in progress, 
 {
 #if defined(USE_TX_BACKPACK)
     if (config.GetDvrAux() == 0)
     {
-        // DVR AUX control is off
-        return;
+        // Handle DVR Recording
+        const uint8_t auxNumber = (config.GetDvrAux() - 1) / 2 + 4;
+        const uint8_t auxInverted = (config.GetDvrAux() + 1) % 2;
+
+        const bool recordingState = CRSF_to_BIT(ChannelData[auxNumber]) ^ auxInverted;
+
+        if (recordingState != lastRecordingState)
+        {
+            lastRecordingState = recordingState;
+
+            const uint16_t delay = GetDvrDelaySeconds(recordingState ? config.GetDvrStartDelay() : config.GetDvrStopDelay());
+
+            mspPacket_t packet;
+            packet.reset();
+            packet.makeCommand();
+            packet.function = MSP_ELRS_BACKPACK_SET_RECORDING_STATE;
+            packet.addByte(recordingState);
+            packet.addByte(delay & 0xFF); // delay byte 1
+            packet.addByte(delay >> 8); // delay byte 2
+
+            MSP::sendPacket(&packet, TxBackpack); // send to tx-backpack as MSP
+        }
     }
 
-    const uint8_t auxNumber = (config.GetDvrAux() - 1) / 2 + 4;
-    const uint8_t auxInverted = (config.GetDvrAux() + 1) % 2;
-
-    const bool recordingState = CRSF_to_BIT(ChannelData[auxNumber]) ^ auxInverted;
-
-    if (recordingState == lastRecordingState)
+    // Handle VTX Channel switch
+    const uint8_t vtxAuxNumber = (config.GetPTREnableChannel() - 1) / 2 + 4;
+    const uint8_t switchState = CRSF_to_SWITCH3b(ChannelData[vtxAuxNumber]);
+    if (switchState != lastSwitchState)
     {
-        // Channel state has not changed since we last checked
-        return;
+        lastSwitchState = switchState;
+        uint8_t vtxIdx = (config.GetVtxBand()-1) * 8 + switchState; // Channels 1 to 6 supported only
+
+        mspPacket_t packet;
+        packet.reset();
+        packet.makeCommand();
+        packet.function = MSP_SET_VTX_CONFIG;
+        packet.addByte(vtxIdx);     // band/channel or frequency low byte
+        packet.addByte(0);          // frequency high byte, if frequency mode
+
+        CRSF::AddMspMessage(&packet, CRSF_ADDRESS_FLIGHT_CONTROLLER);
+        MSP::sendPacket(&packet, TxBackpack); // send to tx-backpack as MSP
     }
-    lastRecordingState = recordingState;
 
-    const uint16_t delay = GetDvrDelaySeconds(recordingState ? config.GetDvrStartDelay() : config.GetDvrStopDelay());
-
-    mspPacket_t packet;
-    packet.reset();
-    packet.makeCommand();
-    packet.function = MSP_ELRS_BACKPACK_SET_RECORDING_STATE;
-    packet.addByte(recordingState);
-    packet.addByte(delay & 0xFF); // delay byte 1
-    packet.addByte(delay >> 8); // delay byte 2
-
-    MSP::sendPacket(&packet, TxBackpack); // send to tx-backpack as MSP
 #endif // USE_TX_BACKPACK
 }
 
@@ -398,7 +415,7 @@ static int event()
     if (OPT_USE_TX_BACKPACK && GPIO_PIN_BACKPACK_EN != UNDEF_PIN)
     {
         // EN should be HIGH to be active
-        digitalWrite(GPIO_PIN_BACKPACK_EN, (config.GetBackpackDisable() || connectionState == bleJoystick || connectionState == wifiUpdate) ? LOW : HIGH);
+        digitalWrite(GPIO_PIN_BACKPACK_EN, config.GetBackpackDisable() ? LOW : HIGH);
     }
 #endif
 
