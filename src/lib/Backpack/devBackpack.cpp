@@ -261,8 +261,8 @@ static void AuxStateToMSPOut()
     const uint8_t channelState = CRSF_to_N(ChannelData[vtxChannelAux], 6); //6-pos, channels
     if (bandState != lastVtxBandState || channelState != lastVtxChannelState)
     {
-        bandState = lastVtxBandState;
-        channelState = lastVtxChannelState;
+        lastVtxBandState = bandState;
+        lastVtxChannelState = channelState;
         uint8_t vtxIdx = (bandState) * 8 + channelState; // Channels 1 to 6 supported only
 
         mspPacket_t packet;
