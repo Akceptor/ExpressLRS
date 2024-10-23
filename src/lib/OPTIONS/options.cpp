@@ -26,6 +26,11 @@ const char *wifi_ap_address = "10.0.0.1";
 
 #if !defined(TARGET_UNIFIED_TX) && !defined(TARGET_UNIFIED_RX)
 
+#if defined(TARGET_RX)
+// This is created by the build_flags.py and used by STM32 (ESP gets it from json)
+#include "flashdiscrim.h"
+#endif
+
 const char device_name[] = DEVICE_NAME;
 const char *product_name = (const char *)(target_name+4);
 
@@ -51,6 +56,22 @@ __attribute__ ((used)) static firmware_options_t flashedOptions = {
     .domain = 6,
     #elif defined(Regulatory_Domain_US_433_WIDE)
     .domain = 7,
+    #elif defined(DM-360-380)
+    .domain = 8,
+    #elif defined(DM-400-420)
+    .domain = 9,
+    #elif defined(DM-480-500)
+    .domain = 10,
+    #elif defined(DM-500-520)
+    .domain = 11,
+    #elif defined(DM-520-540)
+    .domain = 12,
+    #elif defined(DM-720-760)
+    .domain = 13,
+    #elif defined(DM-800-860)
+    .domain = 14,
+    #elif defined(DM-920-940)
+    .domain = 15,
     #else
     #error No regulatory domain defined, please define one in user_defines.txt
     #endif
@@ -62,7 +83,11 @@ __attribute__ ((used)) static firmware_options_t flashedOptions = {
     .hasUID = false,
     .uid = {},
 #endif
+#if defined(FLASH_DISCRIM)
+    .flash_discriminator = FLASH_DISCRIM,
+#else
     .flash_discriminator = 0,
+#endif
 #if defined(FAN_MIN_RUNTIME)
     .fan_min_runtime = FAN_MIN_RUNTIME,
 #else
