@@ -573,7 +573,7 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
       // always enable msp after a channel package since the slot is only used if MspSender has data to send
       NextPacketIsMspData = true;
 
-      injectBackpackPanTiltRollData(now);
+      //TODO HT disabled for now injectBackpackPanTiltRollData(now);
       OtaPackChannelData(&otaPkt, ChannelData, TelemetryReceiver.GetCurrentConfirm(), ExpressLRS_currTlmDenom);
     }
   }
