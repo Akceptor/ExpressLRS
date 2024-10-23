@@ -20,7 +20,8 @@ bool HTEnableFlagReadyToSend = false;
 bool BackpackTelemReadyToSend = false;
 
 bool lastRecordingState = false;
-uint8_t lastSwitchState = 8;
+uint8_t lastVtxBandState = 4;
+uint8_t lastVtxChannelState = 8;
 
 #if defined(GPIO_PIN_BACKPACK_EN)
 
@@ -224,12 +225,12 @@ uint8_t GetDvrDelaySeconds(uint8_t index)
     return delays[index >= sizeof(delays) ? 0 : index];
 }
 
-static void AuxStateToMSPOut() //TODO Work in progress, 
+static void AuxStateToMSPOut()
 {
 #if defined(USE_TX_BACKPACK)
     if (config.GetDvrAux() == 0)
     {
-        // Handle DVR Recording
+        // DVR Recording
         const uint8_t auxNumber = (config.GetDvrAux() - 1) / 2 + 4;
         const uint8_t auxInverted = (config.GetDvrAux() + 1) % 2;
 
@@ -253,13 +254,16 @@ static void AuxStateToMSPOut() //TODO Work in progress,
         }
     }
 
-    // Handle VTX Channel switch
-    const uint8_t vtxAuxNumber = (config.GetPTREnableChannel() - 1) / 2 + 4;
-    const uint8_t switchState = CRSF_to_SWITCH3b(ChannelData[vtxAuxNumber]);
-    if (switchState != lastSwitchState)
+    // VTX Band\Channel
+    const uint8_t vtxBandAux = (config.GetPTREnableChannel() - 1) / 2 + 4;
+    const uint8_t vtxChannelAux = (config.GetPTRStartChannel() - 1) / 2 + 4;
+    const uint8_t bandState = CRSF_to_N(ChannelData[vtxBandAux], 3) + 1; //3-pos, bands, 0=no band
+    const uint8_t channelState = CRSF_to_N(ChannelData[vtxChannelAux], 6); //6-pos, channels
+    if (bandState != lastVtxBandState || channelState != lastVtxChannelState)
     {
-        lastSwitchState = switchState;
-        uint8_t vtxIdx = (config.GetVtxBand()-1) * 8 + switchState; // Channels 1 to 6 supported only
+        bandState = lastVtxBandState;
+        channelState = lastVtxChannelState;
+        uint8_t vtxIdx = (bandState) * 8 + channelState; // Channels 1 to 6 supported only
 
         mspPacket_t packet;
         packet.reset();
