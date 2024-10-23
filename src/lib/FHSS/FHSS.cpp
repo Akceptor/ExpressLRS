@@ -20,10 +20,19 @@ const fhss_config_t domains[] = {
     {"EU433",  FREQ_HZ_TO_REG_VAL(433100000), FREQ_HZ_TO_REG_VAL(434450000), 3, 434000000},
     {"US433",  FREQ_HZ_TO_REG_VAL(433250000), FREQ_HZ_TO_REG_VAL(438000000), 8, 434000000},
     {"US433W",  FREQ_HZ_TO_REG_VAL(423500000), FREQ_HZ_TO_REG_VAL(438000000), 20, 434000000},
+    {"DM-360-380",  FREQ_HZ_TO_REG_VAL(360000000), FREQ_HZ_TO_REG_VAL(380000000), 10},
+    {"DM-400-420",  FREQ_HZ_TO_REG_VAL(400000000), FREQ_HZ_TO_REG_VAL(420000000), 10},
+    {"DM-480-500",  FREQ_HZ_TO_REG_VAL(480000000), FREQ_HZ_TO_REG_VAL(500000000), 10},
+    {"DM-500-520",  FREQ_HZ_TO_REG_VAL(500000000), FREQ_HZ_TO_REG_VAL(520000000), 10},
+    {"DM-520-540",  FREQ_HZ_TO_REG_VAL(520000000), FREQ_HZ_TO_REG_VAL(540000000), 10},
+    {"DM-720-760",  FREQ_HZ_TO_REG_VAL(720000000), FREQ_HZ_TO_REG_VAL(760000000), 20},
+    {"DM-800-860",  FREQ_HZ_TO_REG_VAL(800000000), FREQ_HZ_TO_REG_VAL(860000000), 20},
+    {"DM-920-940",  FREQ_HZ_TO_REG_VAL(920000000), FREQ_HZ_TO_REG_VAL(940000000), 20},
 };
 
 #if defined(RADIO_LR1121)
 const fhss_config_t domainsDualBand[] = {
+    //FREQ_HZ_TO_REG_VAL(2400400000), FREQ_HZ_TO_REG_VAL(2479400000), 80, 2440000000}
     {"ISM2G4", FREQ_HZ_TO_REG_VAL(2400400000), FREQ_HZ_TO_REG_VAL(2479400000), 80, 2440000000}
 };
 #endif
@@ -75,7 +84,7 @@ uint16_t secondaryBandCount;
 void FHSSrandomiseFHSSsequence(const uint32_t seed)
 {
     FHSSconfig = &domains[firmwareOptions.domain];
-    sync_channel = FHSSconfig->freq_count / 2;
+    sync_channel = (FHSSconfig->freq_count / 2) + 1;
     freq_spread = (FHSSconfig->freq_stop - FHSSconfig->freq_start) * FREQ_SPREAD_SCALE / (FHSSconfig->freq_count - 1);
     primaryBandCount = (FHSS_SEQUENCE_LEN / FHSSconfig->freq_count) * FHSSconfig->freq_count;
 
@@ -87,7 +96,7 @@ void FHSSrandomiseFHSSsequence(const uint32_t seed)
 
 #if defined(RADIO_LR1121)
     FHSSconfigDualBand = &domainsDualBand[0];
-    sync_channel_DualBand = FHSSconfigDualBand->freq_count / 2;
+    sync_channel_DualBand = (FHSSconfigDualBand->freq_count / 2) + 1;
     freq_spread_DualBand = (FHSSconfigDualBand->freq_stop - FHSSconfigDualBand->freq_start) * FREQ_SPREAD_SCALE / (FHSSconfigDualBand->freq_count - 1);
     secondaryBandCount = (FHSS_SEQUENCE_LEN / FHSSconfigDualBand->freq_count) * FHSSconfigDualBand->freq_count;
 
