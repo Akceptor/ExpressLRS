@@ -234,6 +234,15 @@ static struct luaItem_command luaVtxSend = {
 };
 //----------------------------VTX ADMINISTRATOR------------------
 
+#if defined(TARGET_TX_FM30)
+struct luaItem_selection luaBluetoothTelem = {
+    {"BT Telemetry", CRSF_TEXT_SELECTION},
+    0, // value
+    luastrOffOn,
+    STR_EMPTYSPACE
+};
+#endif
+
 //---------------------------- BACKPACK ------------------
 static struct luaItem_folder luaBackpackFolder = {
     {"Backpack", CRSF_FOLDER},
@@ -266,13 +275,13 @@ static struct luaItem_selection luaDvrStopDelay = {
     STR_EMPTYSPACE};
 
 static struct luaItem_selection luaHeadTrackingEnableChannel = {
-    {"HT Enable", CRSF_TEXT_SELECTION},
+    {"VTx Band AUX", CRSF_TEXT_SELECTION},
     0, // value
     luastrHeadTrackingEnable,
     STR_EMPTYSPACE};
 
 static struct luaItem_selection luaHeadTrackingStartChannel = {
-    {"HT Start Channel", CRSF_TEXT_SELECTION},
+    {"VTx Channel AUX", CRSF_TEXT_SELECTION},
     0, // value
     luastrHeadTrackingStart,
     STR_EMPTYSPACE};
@@ -286,6 +295,10 @@ static struct luaItem_selection luaBackpackTelemetry = {
 static struct luaItem_string luaBackpackVersion = {
     {"Version", CRSF_INFO},
     backpackVersion};
+
+  static struct luaItem_string luaAbout = {
+    {"About", CRSF_INFO},
+    "VTx contorl v0.1"};
 
 //---------------------------- BACKPACK ------------------
 
@@ -368,6 +381,7 @@ static void luadevUpdateBackpackOpts()
     LUA_FIELD_HIDE(luaHeadTrackingStartChannel);
     LUA_FIELD_HIDE(luaBackpackTelemetry);
     LUA_FIELD_HIDE(luaBackpackVersion);
+    LUA_FIELD_HIDE(luaAbout);
   }
   else
   {
@@ -378,6 +392,7 @@ static void luadevUpdateBackpackOpts()
     LUA_FIELD_SHOW(luaHeadTrackingStartChannel);
     LUA_FIELD_SHOW(luaBackpackTelemetry);
     LUA_FIELD_SHOW(luaBackpackVersion);
+    LUA_FIELD_SHOW(luaAbout);
   }
 }
 
@@ -656,6 +671,12 @@ static void registerLuaParameters()
         }
       }
     });
+    #if defined(TARGET_TX_FM30)
+    registerLUAParameter(&luaBluetoothTelem, [](struct luaPropertiesCommon *item, uint8_t arg) {
+      digitalWrite(GPIO_PIN_BLUETOOTH_EN, !arg);
+      devicesTriggerEvent();
+    });
+    #endif
     if (!firmwareOptions.is_airport)
     {
       registerLUAParameter(&luaSwitch, [](struct luaPropertiesCommon *item, uint8_t arg) {
@@ -820,6 +841,7 @@ static void registerLuaParameters()
             }, luaBackpackFolder.common.id);
 
       registerLUAParameter(&luaBackpackVersion, nullptr, luaBackpackFolder.common.id);
+      registerLUAParameter(&luaAbout, nullptr, luaBackpackFolder.common.id);
     }
   }
 
@@ -901,7 +923,11 @@ static int event()
     setLuaTextSelectionValue(&luaHeadTrackingStartChannel, config.GetBackpackDisable() ? 0 : config.GetPTRStartChannel());
     setLuaTextSelectionValue(&luaBackpackTelemetry, config.GetBackpackDisable() ? 0 : config.GetBackpackTlmMode());
     setLuaStringValue(&luaBackpackVersion, backpackVersion);
+    setLuaStringValue(&luaAbout, "VTx control v0.1");
   }
+#if defined(TARGET_TX_FM30)
+  setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));
+#endif
   luadevUpdateFolderNames();
   return DURATION_IMMEDIATELY;
 }
