@@ -210,7 +210,7 @@ void TxConfig::Load()
         Commit();
     }
 }
-#else  // ESP8266
+#else  // STM32/ESP8266
 void TxConfig::Load()
 {
     m_modified = 0;
@@ -595,40 +595,20 @@ TxConfig::SetButtonActions(uint8_t button, tx_button_color_t *action)
 }
 
 void
-TxConfig::SetPTRVtxChannel(uint8_t ptrVtxChannel)
+TxConfig::SetVtxChannelAux(uint8_t ptrStartChannel)
 {
-    if (ptrVtxChannel != m_model->ptrVtxChannel) {
-        m_model->ptrVtxChannel = ptrVtxChannel;
+    if (ptrStartChannel != m_model->ptrStartChannel) {
+        m_model->ptrStartChannel = ptrStartChannel;
         m_modified |= MODEL_CHANGED;
     }
 }
 
 void
-TxConfig::SetPTRVtxBand(uint8_t ptrVtxBand)
+TxConfig::SetVtxBandAux(uint8_t ptrEnableChannel)
 {
-    if (ptrVtxBand != m_model->ptrVtxBand) {
-        m_model->ptrVtxBand = ptrVtxBand;
+    if (ptrEnableChannel != m_model->ptrEnableChannel) {
+        m_model->ptrEnableChannel = ptrEnableChannel;
         m_modified |= MODEL_CHANGED;
-    }
-}
-
-void
-TxConfig::SetVtxBandResolution(uint8_t vtxBandReso)
-{
-    if (m_config.vtxBandReso != vtxBandReso)
-    {
-        m_config.vtxBandReso = vtxBandReso;
-        m_modified |= MAIN_CHANGED;
-    }
-}
-
-void
-TxConfig::SetVtxChannelResolution(uint8_t vtxChannelReso)
-{
-    if (m_config.vtxChannelReso != vtxChannelReso)
-    {
-        m_config.vtxChannelReso = vtxChannelReso;
-        m_modified |= MAIN_CHANGED;
     }
 }
 
@@ -691,7 +671,7 @@ TxConfig::SetDefaults(bool commit)
     }
 
 #if !defined(PLATFORM_ESP32)
-    // ESP8266 just needs one commit
+    // STM32/ESP8266 just needs one commit
     if (commit)
     {
         Commit();
