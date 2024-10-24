@@ -245,12 +245,12 @@ struct luaItem_selection luaBluetoothTelem = {
 
 //---------------------------- BACKPACK ------------------
 static struct luaItem_folder luaBackpackFolder = {
-    {"Backpack", CRSF_FOLDER},
+    {"Backpack v0.2", CRSF_FOLDER},
 };
 
 #if defined(GPIO_PIN_BACKPACK_EN)
 static struct luaItem_selection luaBackpackEnable = {
-    {"Backpack", CRSF_TEXT_SELECTION},
+    {"Backpack v0.2", CRSF_TEXT_SELECTION},
     0, // value
     luastrOffOn,
     STR_EMPTYSPACE};
@@ -842,22 +842,12 @@ static void registerLuaParameters()
           luaBackpackFolder.common.id);
       registerLUAParameter(
           &luaVtxBandAux, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetPTRVtxBand(arg);
-          },
-          luaBackpackFolder.common.id);
-      registerLUAParameter(
-          &luaVtxBandResolution, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetVtxBandResolution(arg);
+              config.SetVtxBandAux(arg);
           },
           luaBackpackFolder.common.id);
       registerLUAParameter(
           &luaVtxChannelAux, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetPTRVtxChannel(arg);
-          },
-          luaBackpackFolder.common.id);
-        registerLUAParameter(
-          &luaVtxChannelResolution, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetVtxChannelResolution(arg);
+              config.SetVtxChannelAux(arg);
           },
           luaBackpackFolder.common.id);
       registerLUAParameter(
@@ -945,10 +935,8 @@ static int event()
     setLuaTextSelectionValue(&luaDvrAux, config.GetBackpackDisable() ? 0 : config.GetDvrAux());
     setLuaTextSelectionValue(&luaDvrStartDelay, config.GetBackpackDisable() ? 0 : config.GetDvrStartDelay());
     setLuaTextSelectionValue(&luaDvrStopDelay, config.GetBackpackDisable() ? 0 : config.GetDvrStopDelay());
-    setLuaTextSelectionValue(&luaVtxBandAux, config.GetBackpackDisable() ? 0 : config.GetptrVtxBand());
-    setLuaTextSelectionValue(&luaVtxBandResolution, config.GetBackpackDisable() ? 0 : config.GetVtxBandResolution());
-    setLuaTextSelectionValue(&luaVtxChannelAux, config.GetBackpackDisable() ? 0 : config.GetptrVtxChannel());
-    setLuaTextSelectionValue(&luaVtxChannelResolution, config.GetBackpackDisable() ? 0 : config.GetVtxChannelResolution());
+    setLuaTextSelectionValue(&luaVtxBandAux, config.GetBackpackDisable() ? 0 : config.GetVtxBandAux());
+    setLuaTextSelectionValue(&luaVtxChannelAux, config.GetBackpackDisable() ? 0 : config.GetVtxChannelAux());
     setLuaTextSelectionValue(&luaBackpackTelemetry, config.GetBackpackDisable() ? 0 : config.GetBackpackTlmMode());
     setLuaStringValue(&luaBackpackVersion, backpackVersion);
     setLuaStringValue(&luaAbout, "v0.3a");
