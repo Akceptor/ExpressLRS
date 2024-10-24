@@ -306,9 +306,9 @@ static void AuxStateToMSPOut()
     }
 
     // VTX Band\Channel
-    const uint8_t vtxBandAux = (config.GetptrVtxBand()-1) + 4;
-    const uint8_t vtxChannelAux = (config.GetptrVtxChannel()-1) + 4;
-    const uint8_t bandState = getMappedBand(CRSF_to_N(ChannelData[vtxBandAux], 3)); //3-pos, bands
+    const uint8_t vtxBandAux = (config.GetVtxBandAux() - 1) + 4;
+    const uint8_t vtxChannelAux = (config.GetVtxChannelAux() - 1) + 4;
+    const uint8_t bandState = getMappedBand(CRSF_to_N(ChannelData[vtxBandAux], 3)); //3-pos, bands, 0=no band
     const uint8_t channelState = getMappedChannel(CRSF_to_N(ChannelData[vtxChannelAux], 6)); //6-pos, channels
     if (bandState != lastVtxBandState || channelState != lastVtxChannelState)
     {
@@ -326,7 +326,6 @@ static void AuxStateToMSPOut()
         CRSF::AddMspMessage(&packet, CRSF_ADDRESS_FLIGHT_CONTROLLER);
         MSP::sendPacket(&packet, TxBackpack); // send to tx-backpack as MSP
     }
-
 #endif // USE_TX_BACKPACK
 }
 
