@@ -595,20 +595,40 @@ TxConfig::SetButtonActions(uint8_t button, tx_button_color_t *action)
 }
 
 void
-TxConfig::SetPTRStartChannel(uint8_t ptrStartChannel)
+TxConfig::SetPTRVtxChannel(uint8_t ptrVtxChannel)
 {
-    if (ptrStartChannel != m_model->ptrStartChannel) {
-        m_model->ptrStartChannel = ptrStartChannel;
+    if (ptrVtxChannel != m_model->ptrVtxChannel) {
+        m_model->ptrVtxChannel = ptrVtxChannel;
         m_modified |= MODEL_CHANGED;
     }
 }
 
 void
-TxConfig::SetPTREnableChannel(uint8_t ptrEnableChannel)
+TxConfig::SetPTRVtxBand(uint8_t ptrVtxBand)
 {
-    if (ptrEnableChannel != m_model->ptrEnableChannel) {
-        m_model->ptrEnableChannel = ptrEnableChannel;
+    if (ptrVtxBand != m_model->ptrVtxBand) {
+        m_model->ptrVtxBand = ptrVtxBand;
         m_modified |= MODEL_CHANGED;
+    }
+}
+
+void
+TxConfig::SetVtxBandResolution(uint8_t vtxBandReso)
+{
+    if (m_config.vtxBandReso != vtxBandReso)
+    {
+        m_config.vtxBandReso = vtxBandReso;
+        m_modified |= MAIN_CHANGED;
+    }
+}
+
+void
+TxConfig::SetVtxChannelResolution(uint8_t vtxChannelReso)
+{
+    if (m_config.vtxChannelReso != vtxChannelReso)
+    {
+        m_config.vtxChannelReso = vtxChannelReso;
+        m_modified |= MAIN_CHANGED;
     }
 }
 
