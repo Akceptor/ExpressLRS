@@ -49,8 +49,8 @@ static const char antennamodeOpts[] = "Gemini;Ant 1;Ant 2;Switch";
 static const char linkModeOpts[] = "Normal;MAVLink";
 static const char luastrDvrAux[] = "Off;" STR_LUA_ALLAUX_UPDOWN;
 static const char luastrDvrDelay[] = "0s;5s;15s;30s;45s;1min;2min";
-static const char luastrHeadTrackingEnable[] = "Off;" STR_LUA_ALLAUX;
-static const char luastrHeadTrackingStart[] = "Off;" STR_LUA_ALLAUX;
+static const char luastrVtxBand[] = "Off;" STR_LUA_ALLAUX;
+static const char luastrVtxChannel[] = "Off;" STR_LUA_ALLAUX;
 static const char luastrOffOn[] = "Off;On";
 static char luastrPacketRates[] = STR_LUA_PACKETRATES;
 
@@ -274,16 +274,28 @@ static struct luaItem_selection luaDvrStopDelay = {
     luastrDvrDelay,
     STR_EMPTYSPACE};
 
-static struct luaItem_selection luaHeadTrackingEnableChannel = {
+static struct luaItem_selection luaVtxBandAux = {
     {"VTx Band", CRSF_TEXT_SELECTION},
     0, // value
-    luastrHeadTrackingEnable,
+    luastrVtxBand,
     STR_EMPTYSPACE};
 
-static struct luaItem_selection luaHeadTrackingStartChannel = {
+static struct luaItem_selection luaVtxChannelAux = {
     {"VTx Channel", CRSF_TEXT_SELECTION},
     0, // value
-    luastrHeadTrackingStart,
+    luastrVtxChannel,
+    STR_EMPTYSPACE};
+
+static struct luaItem_selection luaVtxBandResolution = {
+    {"Band Reso", CRSF_TEXT_SELECTION},
+    0, // value (index)
+    "2;3;6",
+    STR_EMPTYSPACE};
+
+static struct luaItem_selection luaVtxChannelResolution = {
+    {"Chnl Reso", CRSF_TEXT_SELECTION},
+    0, // value (index)
+    "2;3;6",
     STR_EMPTYSPACE};
 
 static struct luaItem_selection luaBackpackTelemetry = {
@@ -298,7 +310,7 @@ static struct luaItem_string luaBackpackVersion = {
 
   static struct luaItem_string luaAbout = {
     {"VTx ctrl.", CRSF_INFO},
-    "v0.1a"};
+    "v0.2b"};
 
 //---------------------------- BACKPACK ------------------
 
@@ -377,8 +389,10 @@ static void luadevUpdateBackpackOpts()
     LUA_FIELD_HIDE(luaDvrAux);
     LUA_FIELD_HIDE(luaDvrStartDelay);
     LUA_FIELD_HIDE(luaDvrStopDelay);
-    LUA_FIELD_HIDE(luaHeadTrackingEnableChannel);
-    LUA_FIELD_HIDE(luaHeadTrackingStartChannel);
+    LUA_FIELD_HIDE(luaVtxBandAux);
+    LUA_FIELD_HIDE(luaVtxChannelAux);
+    LUA_FIELD_HIDE(luaVtxBandResolution);
+    LUA_FIELD_HIDE(luaVtxChannelResolution);
     LUA_FIELD_HIDE(luaBackpackTelemetry);
     LUA_FIELD_HIDE(luaBackpackVersion);
     LUA_FIELD_HIDE(luaAbout);
@@ -388,8 +402,10 @@ static void luadevUpdateBackpackOpts()
     LUA_FIELD_SHOW(luaDvrAux);
     LUA_FIELD_SHOW(luaDvrStartDelay);
     LUA_FIELD_SHOW(luaDvrStopDelay);
-    LUA_FIELD_SHOW(luaHeadTrackingEnableChannel);
-    LUA_FIELD_SHOW(luaHeadTrackingStartChannel);
+    LUA_FIELD_SHOW(luaVtxBandAux);
+    LUA_FIELD_SHOW(luaVtxChannelAux);
+    LUA_FIELD_SHOW(luaVtxBandResolution);
+    LUA_FIELD_SHOW(luaVtxChannelResolution);
     LUA_FIELD_SHOW(luaBackpackTelemetry);
     LUA_FIELD_SHOW(luaBackpackVersion);
     LUA_FIELD_SHOW(luaAbout);
@@ -825,13 +841,23 @@ static void registerLuaParameters()
           },
           luaBackpackFolder.common.id);
       registerLUAParameter(
-          &luaHeadTrackingEnableChannel, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetPTREnableChannel(arg);
+          &luaVtxBandAux, [](luaPropertiesCommon *item, uint8_t arg) {
+              config.SetPTRVtxBand(arg);
           },
           luaBackpackFolder.common.id);
       registerLUAParameter(
-          &luaHeadTrackingStartChannel, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetPTRStartChannel(arg);
+          &luaVtxBandResolution, [](luaPropertiesCommon *item, uint8_t arg) {
+              config.SetVtxBandResolution(arg);
+          },
+          luaBackpackFolder.common.id);
+      registerLUAParameter(
+          &luaVtxChannelAux, [](luaPropertiesCommon *item, uint8_t arg) {
+              config.SetPTRVtxChannel(arg);
+          },
+          luaBackpackFolder.common.id);
+        registerLUAParameter(
+          &luaVtxChannelResolution, [](luaPropertiesCommon *item, uint8_t arg) {
+              config.SetVtxChannelResolution(arg);
           },
           luaBackpackFolder.common.id);
       registerLUAParameter(
@@ -919,11 +945,13 @@ static int event()
     setLuaTextSelectionValue(&luaDvrAux, config.GetBackpackDisable() ? 0 : config.GetDvrAux());
     setLuaTextSelectionValue(&luaDvrStartDelay, config.GetBackpackDisable() ? 0 : config.GetDvrStartDelay());
     setLuaTextSelectionValue(&luaDvrStopDelay, config.GetBackpackDisable() ? 0 : config.GetDvrStopDelay());
-    setLuaTextSelectionValue(&luaHeadTrackingEnableChannel, config.GetBackpackDisable() ? 0 : config.GetPTREnableChannel());
-    setLuaTextSelectionValue(&luaHeadTrackingStartChannel, config.GetBackpackDisable() ? 0 : config.GetPTRStartChannel());
+    setLuaTextSelectionValue(&luaVtxBandAux, config.GetBackpackDisable() ? 0 : config.GetptrVtxBand());
+    setLuaTextSelectionValue(&luaVtxBandResolution, config.GetBackpackDisable() ? 0 : config.GetVtxBandResolution());
+    setLuaTextSelectionValue(&luaVtxChannelAux, config.GetBackpackDisable() ? 0 : config.GetptrVtxChannel());
+    setLuaTextSelectionValue(&luaVtxChannelResolution, config.GetBackpackDisable() ? 0 : config.GetVtxChannelResolution());
     setLuaTextSelectionValue(&luaBackpackTelemetry, config.GetBackpackDisable() ? 0 : config.GetBackpackTlmMode());
     setLuaStringValue(&luaBackpackVersion, backpackVersion);
-    setLuaStringValue(&luaAbout, "v0.1a");
+    setLuaStringValue(&luaAbout, "v0.2b");
   }
 #if defined(TARGET_TX_FM30)
   setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));
