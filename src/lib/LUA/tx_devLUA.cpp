@@ -49,8 +49,8 @@ static const char antennamodeOpts[] = "Gemini;Ant 1;Ant 2;Switch";
 static const char linkModeOpts[] = "Normal;MAVLink";
 static const char luastrDvrAux[] = "Off;" STR_LUA_ALLAUX_UPDOWN;
 static const char luastrDvrDelay[] = "0s;5s;15s;30s;45s;1min;2min";
-static const char luastrHeadTrackingEnable[] = "Off;On;" STR_LUA_ALLAUX_UPDOWN;
-static const char luastrHeadTrackingStart[] = STR_LUA_ALLAUX;
+static const char luastrHeadTrackingEnable[] = "Off;" STR_LUA_ALLAUX;
+static const char luastrHeadTrackingStart[] = "Off;" STR_LUA_ALLAUX;
 static const char luastrOffOn[] = "Off;On";
 static char luastrPacketRates[] = STR_LUA_PACKETRATES;
 
@@ -275,13 +275,13 @@ static struct luaItem_selection luaDvrStopDelay = {
     STR_EMPTYSPACE};
 
 static struct luaItem_selection luaHeadTrackingEnableChannel = {
-    {"VTx Band AUX", CRSF_TEXT_SELECTION},
+    {"VTx Band", CRSF_TEXT_SELECTION},
     0, // value
     luastrHeadTrackingEnable,
     STR_EMPTYSPACE};
 
 static struct luaItem_selection luaHeadTrackingStartChannel = {
-    {"VTx Channel AUX", CRSF_TEXT_SELECTION},
+    {"VTx Channel", CRSF_TEXT_SELECTION},
     0, // value
     luastrHeadTrackingStart,
     STR_EMPTYSPACE};
@@ -297,8 +297,8 @@ static struct luaItem_string luaBackpackVersion = {
     backpackVersion};
 
   static struct luaItem_string luaAbout = {
-    {"About", CRSF_INFO},
-    "VTx contorl v0.1"};
+    {"VTx ctrl.", CRSF_INFO},
+    "v0.1a"};
 
 //---------------------------- BACKPACK ------------------
 
@@ -923,7 +923,7 @@ static int event()
     setLuaTextSelectionValue(&luaHeadTrackingStartChannel, config.GetBackpackDisable() ? 0 : config.GetPTRStartChannel());
     setLuaTextSelectionValue(&luaBackpackTelemetry, config.GetBackpackDisable() ? 0 : config.GetBackpackTlmMode());
     setLuaStringValue(&luaBackpackVersion, backpackVersion);
-    setLuaStringValue(&luaAbout, "VTx control v0.1");
+    setLuaStringValue(&luaAbout, "v0.1a");
   }
 #if defined(TARGET_TX_FM30)
   setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));
