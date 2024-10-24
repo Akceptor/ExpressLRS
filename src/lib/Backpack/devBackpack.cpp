@@ -228,25 +228,28 @@ uint8_t GetDvrDelaySeconds(uint8_t index)
 // TODO we'll need proper mappings later
 // Maps AUX Switch position to corresponding VTx band
 int getMappedBand(int input) {
-    // OFF, A, B, E, F, R, L
+    //-------------------------------
+    //| OFF | A | B | E | F | R | L |
+    //|  0  | 1 | 2 | 3 | 4 | 5 | 6 |
+    //-------------------------------
     // For 3-pos it is 2-3-4 so by default B, E, F
     switch (input) {
         case 0:
-            return 0; //OFF
+            return 6; 
         case 1:
-            return 1; //A
+            return 1; 
         case 2:
-            return 2; //B
+            return 1; 
         case 3:
-            return 3; //E
+            return 3; 
         case 4:
-            return 5; //F
+            return 5; 
         case 5:
-            return 4; //R
+            return 5; 
         case 6:
-            return 6; //L
+            return 6; 
         default:
-            return 0;  // Return 0 for unknown inputs - band Off
+            return 0;  // Return 0 for unknown inputs
     }
 }
 
@@ -255,19 +258,19 @@ int getMappedBand(int input) {
 int getMappedChannel(int input) {
        switch (input) {
         case 0:
-            return 1;
+            return 0;
         case 1:
-            return 2;
+            return 1;
         case 2:
-            return 3;
+            return 2;
         case 3:
-            return 4;
+            return 3;
         case 4:
-            return 5;
+            return 4;
         case 5:
-            return 6;
+            return 5;
         case 6:
-            return 7;
+            return 6;
         default:
             return 8;  // Return 8 for unknown inputs
        }
@@ -303,10 +306,10 @@ static void AuxStateToMSPOut()
     }
 
     // VTX Band\Channel
-    const uint8_t vtxBandAux = (config.GetPTREnableChannel()-1) + 4;
-    const uint8_t vtxChannelAux = (config.GetPTRStartChannel()-1) + 4;
-    const uint8_t bandState = getMappedBand(CRSF_to_N(ChannelData[vtxBandAux], 3) + 1); //3-pos, bands, 0=no band
-    const uint8_t channelState = CRSF_to_N(ChannelData[vtxChannelAux], 6); //6-pos, channels
+    const uint8_t vtxBandAux = (config.GetptrVtxBand()-1) + 4;
+    const uint8_t vtxChannelAux = (config.GetptrVtxChannel()-1) + 4;
+    const uint8_t bandState = getMappedBand(CRSF_to_N(ChannelData[vtxBandAux], 3)+1); //3-pos, bands
+    const uint8_t channelState = getMappedChannel(CRSF_to_N(ChannelData[vtxChannelAux], 6)); //6-pos, channels
     if (bandState != lastVtxBandState || channelState != lastVtxChannelState)
     {
         lastVtxBandState = bandState;
