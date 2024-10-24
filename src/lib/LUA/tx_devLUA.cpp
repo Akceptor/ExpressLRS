@@ -310,7 +310,7 @@ static struct luaItem_string luaBackpackVersion = {
 
   static struct luaItem_string luaAbout = {
     {"VTx ctrl.", CRSF_INFO},
-    "v0.2b"};
+    "v0.3a"};
 
 //---------------------------- BACKPACK ------------------
 
@@ -951,7 +951,7 @@ static int event()
     setLuaTextSelectionValue(&luaVtxChannelResolution, config.GetBackpackDisable() ? 0 : config.GetVtxChannelResolution());
     setLuaTextSelectionValue(&luaBackpackTelemetry, config.GetBackpackDisable() ? 0 : config.GetBackpackTlmMode());
     setLuaStringValue(&luaBackpackVersion, backpackVersion);
-    setLuaStringValue(&luaAbout, "v0.2b");
+    setLuaStringValue(&luaAbout, "v0.3a");
   }
 #if defined(TARGET_TX_FM30)
   setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));
