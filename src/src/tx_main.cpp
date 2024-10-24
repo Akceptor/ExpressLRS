@@ -445,47 +445,6 @@ void ICACHE_RAM_ATTR HandlePrepareForTLM()
   }
 }
 
-void injectBackpackPanTiltRollData(uint32_t const now)
-{
-#if !defined(CRITICAL_FLASH)
-  // Do not override channels if the backpack is NOT communicating or PanTiltRoll is disabled
-  if (config.GetPTREnableChannel() == HT_OFF || backpackVersion[0] == 0)
-  {
-    return;
-  }
-
-  uint8_t ptrStartChannel = config.GetPTRStartChannel();
-  bool enable = config.GetPTREnableChannel() == HT_ON;
-  if (!enable)
-  {
-    uint8_t chan = CRSF_to_BIT(ChannelData[config.GetPTREnableChannel() / 2 + 3]);
-    if (config.GetPTREnableChannel() % 2 == 0)
-    {
-      enable |= chan;
-    }
-    else
-    {
-      enable |= !chan;
-    }
-  }
-
-  if (enable != headTrackingEnabled)
-  {
-    headTrackingEnabled = enable;
-    HTEnableFlagReadyToSend = true;
-  }
-
-  // If enabled and this packet is less that 1 second old then use it
-  if (enable && now - lastPTRValidTimeMs < 1000)
-  {
-    ChannelData[ptrStartChannel + 4] = ptrChannelData[0];
-    ChannelData[ptrStartChannel + 5] = ptrChannelData[1];
-    ChannelData[ptrStartChannel + 6] = ptrChannelData[2];
-  }
-  // else if not enabled or PTR is old, do not override ChannelData from handset
-#endif
-}
-
 void ICACHE_RAM_ATTR SendRCdataToRF()
 {
   // Do not send a stale channels packet to the RX if one has not been received from the handset
@@ -573,7 +532,6 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
       // always enable msp after a channel package since the slot is only used if MspSender has data to send
       NextPacketIsMspData = true;
 
-      //TODO HT disabled for now injectBackpackPanTiltRollData(now);
       OtaPackChannelData(&otaPkt, ChannelData, TelemetryReceiver.GetCurrentConfirm(), ExpressLRS_currTlmDenom);
     }
   }
